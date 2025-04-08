@@ -1,10 +1,20 @@
 import express from "express";
 import mysql from "mysql2/promise";
+import cors from "cors";
 
 const app = express();
 const PORT = 3001;
 
-// Middleware to parse JSON
+// Explicit CORS configuration
+app.use(
+	cors({
+		origin: "http://localhost:3000", // Allow only Next.js origin
+		methods: ["GET", "POST", "PUT", "DELETE"], // Allowed methods
+		allowedHeaders: ["Content-Type"], // Allowed headers
+	})
+);
+
+// Middleware
 app.use(express.json());
 
 // MySQL connection pool
@@ -15,7 +25,7 @@ const pool = mysql.createPool({
 	database: "task_manager",
 });
 
-// CREATE - Add a new task
+// CREATE
 app.post("/tasks", async (req, res) => {
 	try {
 		const { title, done } = req.body;
@@ -25,21 +35,23 @@ app.post("/tasks", async (req, res) => {
 		);
 		res.status(201).json({ id: result.insertId, title, done });
 	} catch (error) {
+		console.error("POST error:", error);
 		res.status(500).json({ error: error.message });
 	}
 });
 
-// READ - Get all tasks
+// READ all
 app.get("/tasks", async (req, res) => {
 	try {
 		const [rows] = await pool.query("SELECT * FROM tasks");
 		res.json(rows);
 	} catch (error) {
+		console.error("GET error:", error);
 		res.status(500).json({ error: error.message });
 	}
 });
 
-// READ - Get single task by ID
+// READ one
 app.get("/tasks/:id", async (req, res) => {
 	try {
 		const [rows] = await pool.query("SELECT * FROM tasks WHERE id = ?", [
@@ -50,11 +62,12 @@ app.get("/tasks/:id", async (req, res) => {
 		}
 		res.json(rows[0]);
 	} catch (error) {
+		console.error("GET by ID error:", error);
 		res.status(500).json({ error: error.message });
 	}
 });
 
-// UPDATE - Update a task
+// UPDATE
 app.put("/tasks/:id", async (req, res) => {
 	try {
 		const { title, done } = req.body;
@@ -67,11 +80,12 @@ app.put("/tasks/:id", async (req, res) => {
 		}
 		res.json({ id: req.params.id, title, done });
 	} catch (error) {
+		console.error("PUT error:", error);
 		res.status(500).json({ error: error.message });
 	}
 });
 
-// DELETE - Delete a task
+// DELETE
 app.delete("/tasks/:id", async (req, res) => {
 	try {
 		const [result] = await pool.query("DELETE FROM tasks WHERE id = ?", [
@@ -82,11 +96,11 @@ app.delete("/tasks/:id", async (req, res) => {
 		}
 		res.status(204).send();
 	} catch (error) {
+		console.error("DELETE error:", error);
 		res.status(500).json({ error: error.message });
 	}
 });
 
-// Start server
 app.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`);
 });
