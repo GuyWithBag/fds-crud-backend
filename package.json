@@ -1,0 +1,17 @@
+{
+  "name": "fds-crud-backend",
+  "version": "1.0.0",
+  "main": "database.js",
+  "type": "module",
+  "scripts": {
+    "dev": "npx nodemon app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "express": "^5.1.0",
+    "mysql2": "^3.14.0"
+  }
+}
